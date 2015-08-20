@@ -1,3 +1,5 @@
+var idDieta = "";
+
 function mostrarMsjSol(id){
     $(function(){
         if(id === 'divMenuMsj'){
@@ -54,7 +56,14 @@ function mostrarMenu(id){
                 }
             }
         }
+        agregarDieta();
+        quitarDieta();
     });
+}
+
+
+function allowDrop(ev) {
+    ev.preventDefault();
 }
 
 

@@ -15,11 +15,34 @@
   padding: 0.6em 0;
   position: relative;
   color: #fff;
-}
-.dietaCreada:hover {
-  background-color: transparent;
   cursor: pointer;
 }
+.dietaCreada:hover {
+  background-color: rgba(123, 123, 123, 1);
+}
+
+.btnEditarD,
+.btnEliminarD{
+    border-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    border: none;
+}
+
+.btnEditarD{
+    background-color: #0070c8;
+}
+.btnEditarD:hover{
+    background-color: #01579b
+}
+
+.btnEliminarD{
+    background-color: #ff2115;
+}
+.btnEliminarD:hover{
+    background-color: #c80000;
+}
+
+
 .btn-act-usr {
   background-color: #0070c8;
   color: #fff;
@@ -121,6 +144,7 @@
   background-color: #dcdcdc;
   margin-bottom: 0;
   padding-left: 1em;
+  font-weight: 100;
 }
 .espacioDieta {
   background-color: #d3d3d3;
@@ -250,4 +274,28 @@
 .setCantidad:focus{
     text-decoration: underline;
     outline: none;
+}
+
+.desactivado{
+    opacity: .5;
+    cursor: default;
+}
+
+.yaEsta{}
+
+.divTusDietas{
+    display: inline-block;
+}
+
+#mostrarDieta{
+    margin-left: 35%;
+    width: 60%;
+}
+
+#datosDieta{
+    padding: 1em 0;
+}
+
+#datosDieta span{
+    margin-right: .5em;
 }

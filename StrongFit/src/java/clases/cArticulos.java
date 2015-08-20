@@ -21,17 +21,70 @@ public class cArticulos {
         String[] articulosAut = objconexion.getArticulosAut();
         String[] articulosTex = objconexion.getArticulosTex();
         String articulos = "";
-        
+        if(articulosNom != null){      
+        clases.CImagen objimg = new clases.CImagen();
+              String ruta = "";
+              
         for(int i = articulosNom.length-1; i >= 0 ;i--){
             articulos+= "<h2>" + objcifrado.sustituye(articulosNom[i],2) +"</h2> <br>";
-            articulos+= "por: " + articulosAut[i] + " <br>";
+           
+              int verificacionimg = objimg.devuelveexistencia(articulosNom[i],2);
+           
+                String ruta2 = "../../Imagenes/Articulos/";
+                switch(verificacionimg){
+                    case 1: 
+                        ruta = ruta2 + articulosNom[i] + ".jpg";
+                        break;
+                    case 2: 
+                        ruta = ruta2 + articulosNom[i] + ".png";
+                        break;
+                    case 3: 
+                        ruta = ruta2 + articulosNom[i] + ".gif";
+                        break;
+                    default: 
+                        ruta = "../../Imagenes/articulo_sin_imagen.jpg";
+                        break;
+              }
+              
+            articulos += "<img src = \""+ruta+"\" class =\"portada2\" alt = \"foto de usuario\">";
+            articulos+= "<br><br><br><br><br><br><br><br>por: " + articulosAut[i] + " <br>";
+            String recorte = "";
+            int contador2 = 0;
+            boolean checador = false;
             for(int j = 0; j < 200;j++){
-            articulos+= articulosTex[i].charAt(j);
+            recorte+= articulosTex[i].charAt(j);
             if(j == (articulosTex[i].length()-1) ){
             break;
             }
             }
-            articulos+="...<br><br>";
+            for (int l = recorte.length()-1; l > 0;l--){
+              
+            if(recorte.charAt(l)  == '>'){
+                
+            checador = true;    
+            for(int m = l; m < recorte.length();m++ ){
+            if(recorte.charAt(m)== '<' ){
+                checador = false;
+                contador2 = m;
+                
+            }
+            }    
+            
+            }
+            }
+            
+            
+            if(checador){
+            articulos+= recorte;
+            
+            }else{            
+            for (int l = 0; l < recorte.length();l++){
+            if(l < contador2){
+            articulos+=recorte.charAt(l);          
+            }
+            }            
+            }                                                          
+            articulos+="<br><br>...<br><br>";
              articulos+= "Comentarios: " + "<hr>";
              articulos+= "<div id='P"+i+"'>";
              String[][] arreglodecomentarios = objconexion.regresacomentarios(objcifrado.sustituye(articulosNom[i],1));
@@ -55,9 +108,12 @@ public class cArticulos {
             numeroc = nmayor;
             }
             for(int m = ordendecomentarios.length-1 ; m >= 0 ;m--){
+            if(m <= 3){
             articulos+= arreglodecomentarios[ordendecomentarios[m]][0] + "<br>";
             articulos+= arreglodecomentarios[ordendecomentarios[m]][1] + "<br>";
             articulos+= "<hr>";
+            }
+            
             }
             articulos+= "<hr>";
             }else{
@@ -65,41 +121,53 @@ public class cArticulos {
             }
             articulos+= "</div>";
             int estado = objconexion.regresavoto(idusr, articulosNom[i]);
+            int arriba = objconexion.cuentavotos(articulosNom[i])[0];
+            int abajo = objconexion.cuentavotos(articulosNom[i])[1];
+            articulos += "<span id='votos"+i+"'><p style='color: limegreen;\n" +
+"  display: inline-block'>"+arriba+" </p><p style='color: red;\n" +
+"  display: inline;'> "+abajo+"</p></span>";
             switch (estado){
                 case 0:
-                        articulos+= "<span id='u"+i+"' onclick=votar('"+objcifrado.sustituye(articulosNom[i],1)+"',"+i+",1)>";
+                        articulos+= "<span id='u"+i+"' onclick=\"votar('"+objcifrado.sustituye(articulosNom[i],1)+"',"+i+",1),contar('"+articulosNom[i]+"',"+i+")\">";
                         articulos+= "<img src='../../Imagenes/Iconos/sticky-vote.png'></span>";
-                        articulos+= "<span id='d"+i+"' onclick=votar('"+objcifrado.sustituye(articulosNom[i],1)+"',"+i+",0)>";
+                        articulos+= "<span id='d"+i+"' onclick=\"votar('"+objcifrado.sustituye(articulosNom[i],1)+"',"+i+",0),contar('"+articulosNom[i]+"',"+i+")\">";
                         articulos+= "<img src='../../Imagenes/Iconos/sticky-vote2.png'>";                       
                 break;
                 case 1:
-                        articulos+= "<span id='u"+i+"' onclick=votar('"+objcifrado.sustituye(articulosNom[i],1)+"',"+i+",1)>";
+                        articulos+= "<span id='u"+i+"' onclick=\"votar('"+objcifrado.sustituye(articulosNom[i],1)+"',"+i+",1),contar('"+articulosNom[i]+"',"+i+")\">";
                         articulos+= "<img src='../../Imagenes/Iconos/sticky-vote3.png'></span>";
-                        articulos+= "<span id='d"+i+"' onclick=votar('"+objcifrado.sustituye(articulosNom[i],1)+"',"+i+",0)>";
+                        articulos+= "<span id='d"+i+"' onclick=\"votar('"+objcifrado.sustituye(articulosNom[i],1)+"',"+i+",0),contar('"+articulosNom[i]+"',"+i+")\">";
                         articulos+= "<img src='../../Imagenes/Iconos/sticky-vote2.png'>";                        
                 break;
                 case 2:
-                        articulos+= "<span id='u"+i+"' onclick=votar('"+objcifrado.sustituye(articulosNom[i],1)+"',"+i+",1)>";
+                        articulos+= "<span id='u"+i+"' onclick=\"votar('"+objcifrado.sustituye(articulosNom[i],1)+"',"+i+",1),contar('"+articulosNom[i]+"',"+i+")\">";
                         articulos+= "<img src='../../Imagenes/Iconos/sticky-vote.png'></span>";
-                        articulos+= "<span id='d"+i+"' onclick=votar('"+objcifrado.sustituye(articulosNom[i],1)+"',"+i+",0)>";
+                        articulos+= "<span id='d"+i+"' onclick=\"votar('"+objcifrado.sustituye(articulosNom[i],1)+"',"+i+",0),contar('"+articulosNom[i]+"',"+i+")\">";
                         articulos+= "<img src='../../Imagenes/Iconos/sticky-vote4.png'>";                       
                 break;                                  
             }
             articulos+= "</span><input type='text' id='t"+i+"'><button id='botoncoment' onclick=comentar('"+objcifrado.sustituye(articulosNom[i],1)+"',"+i+",'1')>comentar</button><hr>";
             articulos+="<button id='botonabrir' onclick=abrir('"+objcifrado.sustituye(articulosNom[i],1)+"',"+i+")>Seguir leyendo</button>";
        }
+        }else{
+        
+        }
     return articulos;
     }
    public String buscamisarticulos(String idUsr) throws SQLException{
    String articulos = "";
    clases.cCifrado objcifrado = new clases.cCifrado();
-   articulos += "<span onClick=cambiaarticulo('nuevoarticuloenblanco')>Nuevo articulo</span><br>";
+   articulos += "<span onClick=cambiaarticulo('nuevoarticuloenblanco') class='Article-articulosh2'>Nuevo articulo</span><br>";
    cConexion objconexion = new cConexion();
    objconexion.conectar();
    String[] misarticulos = objconexion.buscamisarticulos(idUsr);
    if(misarticulos != null){
-   for(int i = 0; i < misarticulos.length;i++){
-     articulos += "<span onClick=cambiaarticulo('"+misarticulos[i]+"')>" + objcifrado.sustituye(misarticulos[i],2) + "</span>" + "</br>";
+   for(int i = 0; i < misarticulos.length;i++){    
+     if(i != misarticulos.length - 1){
+     articulos += "<span class='Article-articulosh'><span onClick=\"cambiaarticulo('"+misarticulos[i]+"'),cambiarartenuso()\" >" + objcifrado.sustituye(misarticulos[i],2) + "</span><span class='icon-cancel-circle' style='left:91.5%;position:fixed;color:red;' onClick=borrar('"+misarticulos[i]+"')></span></span>" + "</br>";
+     }else{
+     articulos += "<span class='Article-articulosh3'><span onClick=\"cambiaarticulo('"+misarticulos[i]+"'),cambiarartenuso()\" >" + objcifrado.sustituye(misarticulos[i],2) + "</span><span class='icon-cancel-circle' style='left:91.5%;position:fixed;color:red;' onClick=borrar('"+misarticulos[i]+"')></span></span>" + "</br>";
+     }
    }
    }else{
    articulos += "<span>Todavia no has escrito ningun articulo</span><br>";
@@ -109,27 +177,39 @@ public class cArticulos {
    public String buscadatos(String idArticulo, int operacion) throws SQLException{
    cConexion objconexion = new cConexion();
    clases.cCifrado objcifrado = new clases.cCifrado();
+   clases.CImagen objimg = new clases.CImagen();
+   int verificacionimg = objimg.devuelveexistencia(idArticulo,2);
+                String ruta = "";
+                String ruta2 = "../../Imagenes/Articulos/";
+                switch(verificacionimg){
+                    case 1: 
+                        ruta = ruta2 + idArticulo + ".jpg";
+                        break;
+                    case 2: 
+                        ruta = ruta2 + idArticulo + ".png";
+                        break;
+                    case 3: 
+                        ruta = ruta2 + idArticulo + ".gif";
+                        break;
+                    default: 
+                        ruta = "../../Imagenes/articulo_sin_imagen.jpg";
+                        break;
+              }
    String articulo = null;
    if(operacion == 1){
    objconexion.conectar();
    String misarticulos = objconexion.buscamiarticulo(idArticulo);
-   articulo = "Nombre:<br><input type=\"text\" id=\"txtnombre\" value = '"+objcifrado.sustituye(idArticulo,2)+"'><br>\n" +
-"                 <img src = \"\" class =\"img-usr\" alt = \"foto de usuario\">\n" +
-"                <form  enctype=\"multipart/form-data\" id=\"img_frm\" method=\"post\" action=\"../Ssubirimagen.jsp\" name=\"img_frm\">\n" +
-"                        <input type = \"file\"  name=\"uploadFile\" id=\"ImgUsuario\" class=\"input-subir\" required/>\n" +
-"                        <input type = \"submit\" value=\"cambiar\" class=\"btn-imagen\"/>\n" +
-"                </form><br>\n" +
-"                Texto:<br><div contenteditable=\"true\" id=\"txtarticulo\">"+misarticulos+"</div><br>\n" +
-"                <input type=\"button\" value=\"Enviar\" onclick=escribearticulo('escribe')>";
+   articulo = "Titulo:<br><input  id=\"txtnombre\" value = '"+objcifrado.sustituye(idArticulo,2)+"' class = \"articulosk\"><br><br>\n" +
+"                 <img src = \""+ruta+"\" class =\"portada\" alt = \"foto de usuario\">\n"+
+"                Texto:<br><div contenteditable=\"true\" id=\"txtarticulo\" class=\"Article-articulosf\">"+misarticulos+"</div><br>\n" +
+"                <input type=\"button\" value=\"Guardar\" onclick=\"escribearticulo('escribe')\" class=\"botonenviar\">";
    }else{
-   articulo = "Nombre:<br><input type=\"text\" id=\"txtnombre\" value = ''><br>\n" +
-"                 <img src = \"\" class =\"img-usr\" alt = \"foto de usuario\">\n" +
-"                <form  enctype=\"multipart/form-data\" id=\"img_frm\" method=\"post\" action=\"../Ssubirimagen.jsp\" name=\"img_frm\">\n" +
-"                        <input type = \"file\"  name=\"uploadFile\" id=\"ImgUsuario\" class=\"input-subir\" required/>\n" +
-"                        <input type = \"submit\" value=\"cambiar\" class=\"btn-imagen\"/>\n" +
-"                </form><br>\n" +
-"                Texto:<br><div contenteditable=\"true\" id=\"txtarticulo\"><br></div><br>\n" +
-"                <input type=\"button\" value=\"Enviar\" onclick=escribearticulo('escribe')>";
+   articulo = "Titulo:<br><input type=\"text\" id=\"txtnombre\" value = '' class = \"articulosk\"><br><br>\n" +
+"                 <img src = \""+ruta+"\" class =\"portada\" alt = \"foto de usuario\">\n" +
+"                Texto:<br><div contenteditable=\"true\" id=\"txtarticulo\" class=\"Article-articulosf\"><p style=\"display:initial;color: Black;\">  \n" +
+"                        <br>                    \n" +
+"                    </p></div><br>\n" +
+"                <input type=\"button\" value=\"Guardar\" onclick=\"escribearticulo('escribe')\" class=\"botonenviar\">";
    }
    return articulo;
    }
@@ -138,13 +218,32 @@ public class cArticulos {
         cCifrado objcifrado = new cCifrado();
         objconexion.conectar();
         String[] articulosAut = objconexion.buscadatosdemiarticulo(idArt);
-        
+        clases.CImagen objimg = new clases.CImagen();
+              String ruta = "";
         String articulos = "<span id='articulo' class='Article-articulosc'>";
         
         
-            articulos+= "<h2>" + idArt +"</h2><hr> <br>";
+            articulos+= "<h2>" + objcifrado.sustituye(idArt,2) +"</h2><hr> <br>";
             articulos+= "por: " + articulosAut[2] + " <br>";
-            
+            int verificacionimg = objimg.devuelveexistencia(idArt,2);
+           
+                String ruta2 = "../../Imagenes/Articulos/";
+                switch(verificacionimg){
+                    case 1: 
+                        ruta = ruta2 + idArt + ".jpg";
+                        break;
+                    case 2: 
+                        ruta = ruta2 + idArt + ".png";
+                        break;
+                    case 3: 
+                        ruta = ruta2 + idArt + ".gif";
+                        break;
+                    default: 
+                        ruta = "../../Imagenes/articulo_sin_imagen.jpg";
+                        break;
+              }
+              
+            //articulos += "<img src = \""+ruta+"\" class =\"portada2\" alt = \"foto de usuario\">";
             articulos+= articulosAut[1];
             
             articulos+= "</span>";
@@ -182,23 +281,28 @@ public class cArticulos {
             }
             articulos+= "</span><span class='icon-cancel-circle' style='left:82%;position:fixed;color:red;' onClick=cerrar()></span><span id='acciones' class='Article-articulose'>";
             int estado = objconexion.regresavoto(idusr, idArt);
+            int arriba = objconexion.cuentavotos(idArt)[0];
+            int abajo = objconexion.cuentavotos(idArt)[1];
+            articulos += "<span id='votos"+i+"'><p style='color: limegreen;\n" +
+            "  display: inline-block'>"+arriba+" </p><p style='color: red;\n" +
+            "  display: inline;'> "+abajo+"</p></span>";
             switch (estado){
                 case 0:
-                        articulos+= "<span id='us' onclick=votar('"+idArt+"',"+i+",1)>";
+                        articulos+= "<span id='u"+i+"' onclick=\"votar('"+objcifrado.sustituye(idArt,1)+"',"+i+",1),contar('"+idArt+"',"+i+")\">";
                         articulos+= "<img src='../../Imagenes/Iconos/sticky-vote.png'></span>";
-                        articulos+= "<span id='ds' onclick=votar('"+idArt+"',"+i+",0)>";
+                        articulos+= "<span id='d"+i+"' onclick=\"votar('"+objcifrado.sustituye(idArt,1)+"',"+i+",0),contar('"+idArt+"',"+i+")\">";
                         articulos+= "<img src='../../Imagenes/Iconos/sticky-vote2.png'>";                       
                 break;
                 case 1:
-                        articulos+= "<span id='u"+i+"' onclick=votar('"+idArt+"',"+i+",1)>";
+                        articulos+= "<span id='u"+i+"' onclick=\"votar('"+objcifrado.sustituye(idArt,1)+"',"+i+",1),contar('"+idArt+"',"+i+")\">";
                         articulos+= "<img src='../../Imagenes/Iconos/sticky-vote3.png'></span>";
-                        articulos+= "<span id='d"+i+"' onclick=votar('"+idArt+"',"+i+",0)>";
+                        articulos+= "<span id='d"+i+"' onclick=\"votar('"+objcifrado.sustituye(idArt,1)+"',"+i+",0),contar('"+idArt+"',"+i+")\">";
                         articulos+= "<img src='../../Imagenes/Iconos/sticky-vote2.png'>";                        
                 break;
                 case 2:
-                        articulos+= "<span id='u"+i+"' onclick=votar('"+idArt+"',"+i+",1)>";
+                        articulos+= "<span id='u"+i+"' onclick=\"votar('"+objcifrado.sustituye(idArt,1)+"',"+i+",1),contar('"+idArt+"',"+i+")\">";
                         articulos+= "<img src='../../Imagenes/Iconos/sticky-vote.png'></span>";
-                        articulos+= "<span id='d"+i+"' onclick=votar('"+idArt+"',"+i+",0)>";
+                        articulos+= "<span id='d"+i+"' onclick=\"votar('"+objcifrado.sustituye(idArt,1)+"',"+i+",0),contar('"+idArt+"',"+i+")\">";
                         articulos+= "<img src='../../Imagenes/Iconos/sticky-vote4.png'>";                       
                 break;                                  
             }

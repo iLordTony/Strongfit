@@ -16,6 +16,7 @@
         <link rel="stylesheet" type="text/css" href="../../Estilos/estilo_usuario.css">
         <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
         <link rel="stylesheet" type="text/css" href="../../Estilos/estilo_chat.css" >
+        
         <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
         <link rel="stylesheet" type="text/css" href="../../Estilos/estilo_pacientes.css" >
         <!--<script src="../../js/acciones_chatBuscar.js"></script>-->
@@ -49,11 +50,11 @@
         %>
         <%@include file="barra_menu.jsp"%>
          
-        <script>setPosicion('miNutriologo');</script>
+        <script>setPosicion('pacientes');</script>
         <section class = "Section-tbl-usr">
-            <article id="articlePerfilMsjSol" class="Article-tbl-usr2 issues" style="overflow:hidden;">
+            <article id="articlePerfilMsjSol" class="Article-tbl-usr2 issues sinP" style="overflow:hidden;">
                 <div class="divGeneralSolMsj">
-                <div class="menuMS">
+                <div class="menuMS Content-title">
                     <div id="divMenuMsj" style="cursor:pointer;" onclick="mostrarMsjSol(id);">Mensajes</div>
                     <div id="divMenuSol" style="cursor:pointer;" onclick="mostrarMsjSol(id);">Solicitudes</div>
                 </div>
@@ -87,7 +88,7 @@
                                 msj += "...";
                             }
                             
-                            int verificacionimg = objimg.devuelveexistencia(idOtro);
+                            int verificacionimg = objimg.devuelveexistencia(idOtro, 1);
                             String ruta = "lel";
                             String ruta2 = "../../Imagenes/Usuarios/";
                             
@@ -141,7 +142,7 @@
                                 ResultSet rs3 = conecta.spGetInfoUsuario(correoSolicitud);
                                 if(rs3.next()){
                                     clases.CImagen objimg = new clases.CImagen();
-                                    int verificacionimg = objimg.devuelveexistencia(seguro.desencriptar(rs3.getString("idUsuario")));
+                                    int verificacionimg = objimg.devuelveexistencia(seguro.desencriptar(rs3.getString("idUsuario")),1);
                                     String ruta = "lel";
                                     String ruta2 = "../../Imagenes/Usuarios/";
                                     String nom = seguro.desencriptar(rs3.getString("idUsuario"));
@@ -210,13 +211,15 @@
             </article>
             
 <!--===========================================================================================-->
-            <article class = "Article-tbl-usr2 cajachat">               
-                <ul class="menuChatNutriologo">
-                    <li onclick="mostrarMenu('contenedorChatNutriologo');"><input type="radio" name="menuChat" id="chatN"><label id="cN" for="chatN">Chat</label></li>
-                    <li onclick="mostrarMenu('contenedorInfoPaciente');"><input type="radio" onclick="getInfoNutricional();" name="menuChat" id="infoN"><label id="iN" for="infoN">Información</label></li>
-                    <li onclick="mostrarMenu('contenedorEstaPaciente');"><input type="radio" name="menuChat" id="estaN"><label id="eN" for="estaN">Estadísticas</label></li>
-                    <li onclick="mostrarMenu('contenedorDietPaciente');"><input type="radio" name="menuChat" id="dietN"><label id="dN" for="dietN">Dietas</label></li>
-                </ul>
+            <article class = "Article-tbl-usr2 cajachat sinP">               
+                <div class="Content-title">
+                    <ul class="menuChatNutriologo ">
+                        <li onclick="mostrarMenu('contenedorChatNutriologo');"><input type="radio" name="menuChat" id="chatN"><label id="cN" for="chatN">Chat</label></li>
+                        <li onclick="mostrarMenu('contenedorInfoPaciente');"><input type="radio" onclick="getInfoNutricional();" name="menuChat" id="infoN"><label id="iN" for="infoN">Información</label></li>
+                        <li onclick="mostrarMenu('contenedorEstaPaciente');"><input type="radio" name="menuChat" id="estaN"><label id="eN" for="estaN">Estadísticas</label></li>
+                        <li onclick="mostrarMenu('contenedorDietPaciente');"><input type="radio" onclick="getDietasPaciente();" name="menuChat" id="dietN"><label id="dN" for="dietN">Dietas</label></li>
+                    </ul>
+                </div>
                 <div id="contenedorChatNutriologo" class="ventanasChat invisible" >
                     <div class="mensajes" id = "log">
                         <div class="mensaje" ></div>
@@ -305,20 +308,61 @@
                         </table>
                     </div>
                 </div>
+                <!--============================ESTADISTICAS=================================================================-->
                 <div id="contenedorEstaPaciente" class="ventanasChat invisible">
-                    Aqui va la parte de las estadisticas
+                    <div id="btnLabels" class="Estadisticas-header">
+                        <input type="radio" checked name="estadistics" id="caloriasEst" onclick="nuevoPor();"><label for="caloriasEst" id="labelCalEst">Calorías</label>
+                        <input type="radio" name="estadistics" id="procarlip" onclick="nuevoPor();"><label for="procarlip" id="labelProCarLip">Pro/Car/Lip</label>
+                    </div>
+                    <div id="chart_div">
+                        <br>
+                        No has seleccionado ninguna opción.
+                    </div>
+                    <ul>
+                        <li class="listaGraficas" id="labelG1" onclick="datosGrafica(id);"><span class="spanCambiarDia" onclick="cambiarDia(0);"><</span><span id="spanInfoDia">Hoy</span><span class="spanCambiarDia" onclick="cambiarDia(1);">></span></li>
+                        <!--<li class="listaGraficas" id="labelG2" onclick="datosGrafica(id);"><span class="spanCambiarSemana"><</span><span id="spanInfoSem">Esta semana</span><span class="spanCambiarSemana">></span></li>-->
+                        <li class="listaGraficas" id="labelG3" onclick="datosGrafica(id);"><span class="spanCambiarMensual" onclick="cambiarMensual(0);"><</span><span id="spanInfoMes">Este mes</span><span class="spanCambiarMensual" onclick="cambiarMensual(1);">></span></li>
+                        <!--<li class="listaGraficas" id="labelG4" onclick="datosGrafica(id);"><span><</span>Alimentos<span>></span></li>-->
+                    </ul>
                 </div>
                 <div id="contenedorDietPaciente" class="ventanasChat invisible">
-                    Aqui va la parte de las dietas
+                    <div class="contenedorDietasNutriologo">
+                            <p>Dietas creadas por ti</p>
+                            <div id="divTusDietas">
+                            <%
+                                ResultSet misdietas = conecta.getDietasRegistradas(idS);
+                                String nomDieta = "";
+                                int idD = 0;
+                                int contadorD = 0;
+                                while(misdietas.next()){
+                                    nomDieta = misdietas.getString("nombre");
+                                    idD = misdietas.getInt("idDieta");
+                                    %>
+                                    <div class="misDietas"><input type="hidden" id="idDietaNutriologo" value="<%=idD%>">
+                                        <span name="btnAgregar" class="btnAgregar" value="Agregar" onclick="agregarDieta();">></span>
+                                        <span><%=nomDieta%></span>
+                                        <span name="btnQuitar" class="btnQuitar invisible" value="Quitar" onclick="quitarDieta();"><</span>
+                                    </div>
+                                    <%
+                                    contadorD++;
+                                }
+                            %>
+                        </div>
+                    </div>
+                    
+                    <div class="contenedorDietasNutriologo" >
+                        <p>Dietas del paciente</p>
+                        <div id="divDietasPaciente"></div>
+                    </div>
                 </div>
             </article>
 <!--===========================================================================================-->
             
-            <article class = "Article-tbl-usr2 contactos">
+            <article class = "Article-tbl-usr2 contactos sinP">
                 <div>
                     <p class="contenedor-search">
-                        <input type="search" id="search" name="search" onkeypress="buscarUsuario();" class="search" style="width:10em;"  placeholder="Buscar personas...">
-                        <label class = "icon-search label-search" for = "buscar"></label>
+                        <span class = "span-search"><label class = "icon-search label-search" for = "buscar"></label></span>
+                        <input type="search" id="search" name="search" onkeypress="buscarUsuario();" class="search input-search" style="width:10em;"  placeholder="Buscar personas...">
                     </p>
                 </div>
                 <%
@@ -343,9 +387,9 @@
                             ses = rs.getString("sesion");
                             if(!usr.equals(idUsr)){
                         %>
-                        <div style="cursor:pointer;" onclick="activarMensajes('<%=usr%>', '<%=idUsr%>', 'no');">
+                        <div class="misDietas" style="cursor:pointer;" onclick="activarMensajes('<%=usr%>', '<%=idUsr%>', 'no');">
                             <input type="hidden" id="ses<%=con%>" class="<%=usr%>" value="<%=ses%>" >
-                            <p id="usr<%=con%>"><%=usr%></p>
+                            <p class="noM" id="usr<%=con%>"><%=usr%></p>
                         </div>
                         <%
                             con++;

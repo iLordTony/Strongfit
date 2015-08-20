@@ -13,11 +13,13 @@ public class cConexion {
     private Connection con = null;
     private Statement st;
     private String dominio = "";
+    private String direccionWS = "";
     
     //Para conectar por default
     public Connection conectar()
     {
         dominio = "http://localhost:8080/StrongFit/";
+        direccionWS = "ws://192.168.1.76:8080/StrongFit/endpoint";
         try
         {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -33,6 +35,10 @@ public class cConexion {
             e.printStackTrace();
         }
         return con;
+    }
+    public void cerrar() throws SQLException{
+        con.close();
+        con = null;
     }
     
     //Para conectar con nuestros propios datos
@@ -54,6 +60,10 @@ public class cConexion {
     public String getDominio()
     {
         return dominio;
+    }
+    
+    public String getWS(){
+        return direccionWS;
     }
     //Esto da de alta los primeros 3 campos de los nuevos usuarios
     public String altausuario(String idUser, String pass, String nombre, String nom) throws SQLException
@@ -433,10 +443,10 @@ public class cConexion {
     }
     
     //Con esto se crea una nueva dieta
-    public ResultSet spSetDieta(String nom, int tipo, int kcal, float pro, float car, float lip, int considera) throws SQLException
+    public ResultSet spSetDieta(int idD, String nom, int tipo, int kcal, float pro, float car, float lip, int considera, String idCreador, String nomC) throws SQLException
     {
         this.st = con.createStatement();
-        return this.st.executeQuery("call spSetDieta('"+nom+"', "+tipo+", "+kcal+", "+pro+", "+car+", "+lip+", "+considera+");");
+        return this.st.executeQuery("call spSetDieta("+idD+", '"+nom+"', "+tipo+", "+kcal+", "+pro+", "+car+", "+lip+", "+considera+", '"+idCreador+"', '"+nomC+"');");
     }
     
     //Esto es para crear un dia de la dieta
@@ -459,6 +469,48 @@ public class cConexion {
         this.st = con.createStatement();
         return this.st.executeQuery("call spInsertarAlimentoComida("+idAlimen+", "+idComi+", "+cant+");");
     }
+    
+    //Esto borrara la dieta despues de verificar su pertenencia 
+    public ResultSet spBorrarDieta(int dieta, String idUsr) throws SQLException
+    {
+        this.st = con.createStatement();
+        return this.st.executeQuery("call spBorrarDieta("+dieta+", '"+idUsr+"');");
+    }
+    
+    //Esto borrara el dia despues de verificar su pertenencia 
+    public ResultSet spBorrarDia(int idDia) throws SQLException
+    {
+        this.st = con.createStatement();
+        return this.st.executeQuery("call spBorrarDia("+idDia+");");
+    }
+    
+    //Esto borrara la comida despues de verificar su pertenencia 
+    public ResultSet spBorrarComida(int idComi, int idDiet) throws SQLException
+    {
+        this.st = con.createStatement();
+        return this.st.executeQuery("call spBorrarComida("+idComi+", "+idDiet+");");
+    }
+    
+    //Esto borrara el dia despues de verificar su pertenencia 
+    public ResultSet spGetDiaDieta(int idDiet) throws SQLException
+    {
+        this.st = con.createStatement();
+        return this.st.executeQuery("call spGetDiaDieta("+idDiet+");");
+    }
+    
+    //Esto borrara el dia despues de verificar su pertenencia 
+    public ResultSet spGetComidaDia(int idDia) throws SQLException
+    {
+        this.st = con.createStatement();
+        return this.st.executeQuery("call spGetComidaDia("+idDia+");");
+    }
+    
+    //Esto borrara el dia despues de verificar su pertenencia 
+    public ResultSet spGetAlimentoComida(int idCom) throws SQLException
+    {
+        this.st = con.createStatement();
+        return this.st.executeQuery("call spGetAlimentoComida("+idCom+");");
+    }
             
     //Esto busca los alimentos y los agrega a un Array 
     public ArrayList<cAlimento> buscarAlimento(String info) throws SQLException{
@@ -469,7 +521,6 @@ public class cConexion {
         this.st = con.createStatement();
         ResultSet rs = this.st.executeQuery("call spBuscarAlimento('"+info+"');");
         while(rs.next()){
-            System.out.print("***************Entro al while************************");
             id = Integer.parseInt(rs.getString("idAlimento"));
             nombre = rs.getString("nombre");
             calorias = Float.parseFloat(rs.getString("calorias"));
@@ -517,77 +568,261 @@ public class cConexion {
         return respuesta;
     }
     
-    public String ruta(){
+    public String ruta(int i){
         String ruta = "";
-        //ruta = "C:\\Users\\jorge pastrana\\Proyectos\\s5\\Strongfit\\StrongFit\\web\\Imagenes\\Usuarios\\"; //La ruta de Jorge
-        ruta = "C:\\Users\\USER\\Documents\\Git\\Strongfit\\StrongFit\\web\\Imagenes\\Usuarios";  //Ruta de Tona
+        if(i == 1){
+        ruta = "J:\\Strom\\Strongfit\\StrongFit\\web\\Imagenes\\Usuarios\\"; //La ruta de Jorge
+        //ruta = "C:\\Users\\USER\\Documents\\Git\\Strongfit\\StrongFit\\web\\Imagenes\\Usuarios";  //Ruta de Tona
+        }else{
+        ruta = "E:\\Strongfit\\StrongFit\\web\\Imagenes\\Articulos\\";
+        }
         return  ruta;
     }
     
     public String[] getArticulosNom() throws SQLException{
     this.st = con.createStatement();
     ResultSet rs = this.st.executeQuery("call sp_SeleccionarArticulos();");
-    String[] articulos = null;
+    ResultSet rs3 = null;
+    String[][] articulos = null;
+    String[] articulosordenados = null;
     int contador = 0;
     if(rs.next()){
     while(rs.next()){
     contador++;
     }
     contador++;
+    
     ResultSet rs2 = this.st.executeQuery("call sp_SeleccionarArticulos();");
-    articulos = new String[contador];
+    articulos = new String[contador][2];
+    articulosordenados = new String[contador];
      int contador2 = 0;
      while(rs2.next()){
-     articulos[contador2] = rs2.getString("nombre");
+         articulos[contador2][0] = rs2.getString("nombre");
+         contador2++;
+     }
      
-     contador2++;
+     
+     
+     
+     
+     for(int i = 0; i < contador;i++){
+      
+     rs3 = this.st.executeQuery("call sp_regresavotos('"+articulos[i][0]+"');");
+     if(rs3.next()){
+      int resultado = rs3.getInt("arriba");
+      resultado -= rs3.getInt("abajo");
+      articulos[i][1] = Integer.toString(resultado);
+   
+     
+     }
+     }
+    
+     boolean termine = false;
+     int contador3 = contador - 1;
+     int valor = -2000;
+     String identifica = "";
+     String identifica2 = "";
+     int val = 0;
+   
+     while(!termine){
+      int e = 0;  
+     for(int i = 0; i < contador;i++){
+   
+     if(!articulos[i][0].equals(identifica2)){
+        
+         int numero = Integer.parseInt(articulos[i][1]);
+          
+     if(Integer.parseInt(articulos[i][1]) >= valor ){
+          
+     valor = Integer.parseInt(articulos[i][1]);
+     identifica = articulos[i][0];
+     e = i;
+    
+     }
+     }
+     
+     }
+     articulosordenados[contador3] = identifica;
+     articulos[e][1] = "-201";
+     
+     contador3--;
+     
+     if(contador3 == -1){
+     termine = true;
+      
+     }
+     identifica2 = identifica;
+     valor = -200;
      }
     }
-    return articulos;
+   
+    return articulosordenados;
     }
     
     public String[] getArticulosAut() throws SQLException{
-    this.st = con.createStatement();
+     this.st = con.createStatement();
     ResultSet rs = this.st.executeQuery("call sp_SeleccionarArticulos();");
-    String[] articulos = null;
+    ResultSet rs3 = null;
+    String[][] articulos = null;
+    String[] articulosordenados = null;
     int contador = 0;
     if(rs.next()){
     while(rs.next()){
     contador++;
     }
     contador++;
+    
     ResultSet rs2 = this.st.executeQuery("call sp_SeleccionarArticulos();");
-    articulos = new String[contador];
+    articulos = new String[contador][3];
+    articulosordenados = new String[contador];
      int contador2 = 0;
      while(rs2.next()){
-     articulos[contador2] = rs2.getString("idmedico");
+         articulos[contador2][0] = rs2.getString("nombre");
+         articulos[contador2][2] = rs2.getString("idmedico");
+         contador2++;
+     }
      
-     contador2++;
+     
+     
+     
+     
+     for(int i = 0; i < contador;i++){
+      
+     rs3 = this.st.executeQuery("call sp_regresavotos('"+articulos[i][0]+"');");
+     if(rs3.next()){
+      int resultado = rs3.getInt("arriba");
+      resultado -= rs3.getInt("abajo");
+      articulos[i][1] = Integer.toString(resultado);
+     
+     
+     }
+     }
+    
+     boolean termine = false;
+     int contador3 = contador - 1;
+     int valor = -2000;
+     String identifica = "";
+     String identifica2 = "";
+     String valt = "";
+     int val = 0;
+   
+     while(!termine){
+       int e = 0;  
+     for(int i = 0; i < contador;i++){
+     
+     if(!articulos[i][0].equals(identifica2)){
+        
+         int numero = Integer.parseInt(articulos[i][1]);
+         
+     if(Integer.parseInt(articulos[i][1]) >= valor ){
+          
+     valor = Integer.parseInt(articulos[i][1]);
+     e = i;
+     identifica = articulos[i][0];
+     valt = articulos[i][2];
+     
+     }
+     }
+     
+     }
+     articulosordenados[contador3] = valt;
+     articulos[e][1] = "-201";
+     
+     contador3--;
+     
+     if(contador3 == -1){
+     termine = true;
+      
+     }
+     identifica2 = identifica;
+     valor = -200;
      }
     }
-    return articulos;
+   
+    return articulosordenados;
     }
     
     public String[] getArticulosTex() throws SQLException{
-    this.st = con.createStatement();
+     this.st = con.createStatement();
     ResultSet rs = this.st.executeQuery("call sp_SeleccionarArticulos();");
-    String[] articulos = null;
+    ResultSet rs3 = null;
+    String[][] articulos = null;
+    String[] articulosordenados = null;
     int contador = 0;
     if(rs.next()){
     while(rs.next()){
     contador++;
     }
     contador++;
+    
     ResultSet rs2 = this.st.executeQuery("call sp_SeleccionarArticulos();");
-    articulos = new String[contador];
+    articulos = new String[contador][3];
+    articulosordenados = new String[contador];
      int contador2 = 0;
      while(rs2.next()){
-     articulos[contador2] = rs2.getString("texto");
+         articulos[contador2][0] = rs2.getString("nombre");
+         articulos[contador2][2] = rs2.getString("texto");
+         contador2++;
+     }
      
-     contador2++;
+     
+     
+     
+     
+     for(int i = 0; i < contador;i++){
+      
+     rs3 = this.st.executeQuery("call sp_regresavotos('"+articulos[i][0]+"');");
+     if(rs3.next()){
+      int resultado = rs3.getInt("arriba");
+      resultado -= rs3.getInt("abajo");
+      articulos[i][1] = Integer.toString(resultado);
+      
+     
+     }
+     }
+    
+     boolean termine = false;
+     int contador3 = contador - 1;
+     int valor = -2000;
+     String identifica = "";
+     String identifica2 = "";
+     String valt = "";
+     int val = 0;
+   
+     while(!termine){
+     int e = 0;   
+     for(int i = 0; i < contador;i++){
+     
+     if(!articulos[i][0].equals(identifica2)){
+        
+         int numero = Integer.parseInt(articulos[i][1]);
+         
+     if(Integer.parseInt(articulos[i][1]) >= valor ){
+          
+     valor = Integer.parseInt(articulos[i][1]);
+     identifica = articulos[i][0];
+    e = i;
+     valt = articulos[i][2];
+     
+     }
+     }
+     
+     }
+     articulosordenados[contador3] = valt;
+      articulos[e][1] = "-201";
+     
+     contador3--;
+     
+     if(contador3 == -1){
+     termine = true;
+      
+     }
+     identifica2 = identifica;
+     valor = -200;
      }
     }
-    return articulos;
+   
+    return articulosordenados;
     }
     
     public int regresavoto(String idusr, String nPost) throws SQLException{
@@ -718,6 +953,125 @@ public class cConexion {
     }
     return misarticulos;
     }
+    //Este procedure agrega los alimentos mediante el id del paciente, el del alimento y el dia del mes, el mes y año
+    public int spSetAlimentoFecha(int idA, int idPaciente, int tipo, int diaMes, int mes, int year, float gramos) throws SQLException{
+        this.st = con.createStatement();
+        ResultSet rs = this.st.executeQuery("call spSetAlimentoFecha("+idA+", "+idPaciente+", "+tipo+", "+diaMes+", "+mes+", "+year+", "+gramos+");");
+        int idAlta = 0;
+        while(rs.next()){
+            idAlta = rs.getInt("valor"); //Recupera el ID de la relacion muchos a muchos para poder borrar el alimento si se requiere
+        }
+        return idAlta;
+    }
+    //Con esto recuperamos todos los alimentos usando parametros similares a los anteriores
+    public ResultSet getAlimentosPorFecha(int idPaciente, int dia, int mes, int year) throws SQLException{
+        this.st = con.createStatement();
+        ResultSet rs = this.st.executeQuery("call spGetAlimentosPorFecha("+idPaciente+", "+dia+", "+mes+", "+year+");");
+        return rs;
+    }
+    //Borramos el alimento mediante el id de la relacion muchos a muchos antes mencionada
+    //Solo borra la relacion de la tabla muchos a muchos (alimento_fecha), creo que eso esta bien
+    public void spBorrarAlimentoFecha(int idFecha) throws SQLException{
+        this.st = con.createStatement();
+        this.st.executeQuery("call spBorrarAlimentoFecha("+idFecha+");");
+    }
+    //borra articulos
+    public void borrararticulo(String idArt) throws SQLException{
+        this.st = con.createStatement();
+        this.st.executeQuery("call sp_Borrararticulo('"+idArt+"');");
+    }
+     public int[] cuentavotos(String idArt) throws SQLException{
+        this.st = con.createStatement();
+        ResultSet resultado = null;
+        int votos[] = new int[2];
+        resultado = this.st.executeQuery("call sp_regresavotos('"+idArt+"');");
+        if(resultado.next()){
+         votos[0] = resultado.getInt("arriba");
+          votos[1] = resultado.getInt("abajo");       
+        }
+        return votos;
+    }
+     
+    //spGetAlimentosMes(in id_paciente int, in numMes int, in numYear int)
+    public ResultSet spGetAlimentosMes(int idPaciente, int numMes, int year)throws SQLException{
+       this.st = con.createStatement();
+       return this.st.executeQuery("call spGetAlimentosMes("+idPaciente+", "+numMes+", "+year+");");
+    }
+     
+     //spGetAlimentosMes(in id_paciente int, in numMes int, in numYear int)
+    public ResultSet spSetAsociasiones(int idPaciente, int idMe, int idD, String idUsrM, int accion)throws SQLException{
+       this.st = con.createStatement();
+       return this.st.executeQuery("call spSetAsociasiones("+idPaciente+", "+idMe+", "+idD+", '"+idUsrM+"', "+accion+");");
+    }
+     
+     //spGetAlimentosMes(in id_paciente int, in numMes int, in numYear int)
+    public ResultSet spGetAsociaciones(int idPaciente)throws SQLException{
+       this.st = con.createStatement();
+       return this.st.executeQuery("call spGetAsociaciones("+idPaciente+");");
+    }
+     
+     //nos trae el idPaciente de el usuario paciente
+    public ResultSet spTraerIdPaciente(String idPaciente)throws SQLException{
+       this.st = con.createStatement();
+       return this.st.executeQuery("call spTraerIdPaciente('"+idPaciente+"');");
+    }
+     
+     //nos trae el idPaciente de el usuario paciente
+    public ResultSet spTraerIdMedico(String idPaciente)throws SQLException{
+       this.st = con.createStatement();
+       return this.st.executeQuery("call spTraerIdMedico('"+idPaciente+"');");
+    }
+     
+    //Agrega, actualiza o borra un registro de dietas
+    public ResultSet spSetResgitroDietas(int dieta, int idSemana, int idAnio, int Paciente, int accion)throws SQLException{
+       this.st = con.createStatement();
+       return this.st.executeQuery("call spSetResgitroDietas("+dieta+", "+idSemana+", "+idAnio+", "+Paciente+", "+accion+");");
+    } 
+     
+    //nos trae el idPaciente de el usuario paciente
+    public ResultSet spSetPosicion(int idDieta, int idPaciente, int pos)throws SQLException{
+       this.st = con.createStatement();
+       return this.st.executeQuery("call spSetPosicion('"+idDieta+"', '"+idPaciente+"', '"+pos+"');");
+    }
+     
+     //nos trae el idPaciente de el usuario paciente
+    public ResultSet spGetRegistroDietas(int idPaciente)throws SQLException{
+       this.st = con.createStatement();
+       return this.st.executeQuery("call spGetRegistroDietas("+idPaciente+");");
+    }
+    public ResultSet spGetTodosAlimentos() throws SQLException{
+        this.st = con.createStatement();
+        return this.st.executeQuery("select * from alimento;");
+    }
+
+    public ResultSet spGetDatosPaciente(String correo, String contra) throws SQLException {
+        this.st = con.createStatement();
+        return this.st.executeQuery("select nombre, idPaciente from usuario where idUsuario='" + correo + "' and passUsuario='" + contra + "';");
+    }
+    public ResultSet spGetTiposAlimento() throws SQLException{
+        this.st = con.createStatement();
+        return this.st.executeQuery("call spGetTiposAlimento();");
+    }
+    //spAjustarPos(in idPac int, in diaA int)
+    public ResultSet spAjustarPos(int idPaciente, int diaAnio) throws SQLException{
+        this.st = con.createStatement();
+        return this.st.executeQuery("call spAjustarPos("+idPaciente+","+diaAnio+");");
+    }
+    public ResultSet spGetComidasDieta(int idPaciente, int diaSemana, int comida) throws SQLException{
+        this.st = con.createStatement();
+        return this.st.executeQuery("call spGetComidasDieta("+idPaciente+", "+diaSemana+", "+comida+");");
+    }
     
+    //Retorna el idUsuario de un paciente
+    public ResultSet spGetUsrId(int idPaciente) throws SQLException{
+        this.st = con.createStatement();
+        return this.st.executeQuery("call spGetUsrId("+idPaciente+");");
+    }
+    
+    //Esto trae si o no dependiendo de si 
+    public ResultSet spGetAsociacionEspecifica(int idDieta, int idPaciente) throws SQLException{
+        this.st = con.createStatement();
+        return this.st.executeQuery("call spGetAsociacionEspecifica("+idDieta+", "+idPaciente+");");
+    }
 }
 

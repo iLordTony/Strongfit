@@ -44,21 +44,39 @@ public class sCambiarMetas extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
 
             HttpSession sesion = request.getSession();
-            int idCon = Integer.parseInt(request.getParameter("idCon"));
-            int caloriasDia = 0;
-            
             cConexion conectar = new cConexion();
             conectar.conectar();
             
-            ResultSet rs = conectar.spGetConteo(idCon);
-            if(rs.next())
-            {
-                caloriasDia = rs.getInt("caloriasDia");
-            }
+            int idPaciente = (Integer)sesion.getAttribute("idPaciente");
             
+            int diaMes = Integer.parseInt(request.getParameter("diaMes"));
+            int diaSemana = Integer.parseInt(request.getParameter("diaSemana")) + 1; //Por que en la base el domingo es 1
+            int numMes = Integer.parseInt(request.getParameter("numMes"));
+            int year = Integer.parseInt(request.getParameter("year"));
+            
+            int caloriasdia = 0;
+            int calorias = 0;
+            float kcalorias = 0;
+            float gramos;
+            System.out.println("Datos en sCambiarMetas: " + idPaciente + " " + diaSemana + " " + diaMes);
+            ResultSet rs = conectar.getAlimentosPorFecha(idPaciente, diaMes, numMes, year);
+            while(rs.next()){
+                calorias = rs.getInt("calorias");
+                gramos = rs.getFloat("gramos");
+
+                kcalorias += (gramos * calorias)/100;
+            }
+            String calTotales = String.format("%.2f", kcalorias);
+            
+            ResultSet rs2 = conectar.spGetCaloriasPacienteEspecifico(idPaciente, diaSemana);
+            if(rs2.next()){
+                caloriasdia = rs2.getInt("calorias");
+            }
+            conectar.cerrar();
             Map respuesta = new HashMap();
-            respuesta.put("calDia", caloriasDia);
-            write(response,respuesta);
+            respuesta.put("calDia", calTotales);
+            respuesta.put("laMeta", caloriasdia);
+            write(response, respuesta);
         }
     }
 

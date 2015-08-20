@@ -1,10 +1,13 @@
 var idAlimentoD = 0;
 var contadorD = 0;
-var dia = 0;
+var diaDietas = 0;
+var filtro = 0;
 
 var idRandom = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','1','2','3','4','5','6','7','8','9','0','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
 var idReforzado = 0;
 var cantidadDef = 30;
+var tiemposComida = ['Desayuno', 'Colación 1', 'Comida', 'Colación 2', 'Cena'];
+var diasArreglo = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
 var caloriasMeta = 0;
 var caloriasDia = [];
@@ -12,6 +15,11 @@ var caloriasPromedio = 0;
 var proteinas = [], proPorciento = [];
 var lipidos = [], lipPorciento = [];
 var carbohidratos = [], carPorciento = [];
+
+var caloriasMuestra = [];
+var proteinasMuestra = [];
+var lipidosMuestra = [];
+var carbohidratosMuestra = [];
 
 var proTem = 0;
 var lipTem = 0;
@@ -28,16 +36,25 @@ for(var i = 0; i < 7; ++i){
     proPorciento[i] = 0;
     lipPorciento[i] = 0;
     carPorciento[i] = 0;
+    caloriasMuestra[i] = 0;
+    proteinasMuestra[i] = 0;
+    lipidosMuestra[i] = 0;
+    carbohidratosMuestra[i] = 0;
 }
 
 //oculta el menu de las dietas creadas
-function ocultar()
-{
+function ocultar(){
     $(function(){
         $('#textoTitulo').addClass('textoBueno');
         $('#tusDietas').animate({
             width : 0,
             opacity : 0
+        }, function(){
+            $(this).addClass('invisible');
+        });
+        $('#mostrarDieta').animate({
+            width: 0,
+            opacity: 0
         }, function(){
             $(this).addClass('invisible');
             revelar();
@@ -70,24 +87,24 @@ function revelar()
 }
 
 //muestra las opciones de las dietas creadas
-function mostrarOpciones(id)
-{
-    $(function(){
-        setTimeout(function(){
-            $('#opc' + id).removeClass('invisible');
-        },200);
-    });
-}
-
-//oculta las opciones que tienen las dietas creadas
-function ocultarOpciones(id)
-{
-    $(function(){
-        setTimeout(function(){
-            $('#opc' + id).addClass('invisible');
-        },200);
-    });
-}
+//function mostrarOpciones(id)
+//{
+//    $(function(){
+//        setTimeout(function(){
+//            $('#opc' + id).removeClass('invisible');
+//        },200);
+//    });
+//}
+//
+////oculta las opciones que tienen las dietas creadas
+//function ocultarOpciones(id)
+//{
+//    $(function(){
+//        setTimeout(function(){
+//            $('#opc' + id).addClass('invisible');
+//        },200);
+//    });
+//}
 
 //Se dispara para evitar cualquier cosa que ocurra por default
 function allowDrop(ev) {
@@ -107,223 +124,49 @@ function drop(ev, id)
     $(function(){
         ev.preventDefault();
         
-        var divContent = document.getElementById(id);
+        var divContent = $('#'+id);
         var dat = ev.dataTransfer.getData("text");
         
-        divContent.appendChild(document.getElementById(dat));
-        //hacemos visible un tache para que cuando se apachurre se elimine ese elemento
-        $('#tache'+idAlimentoD).removeClass('invisible');
-        $('#flechitas'+idAlimentoD).removeClass('invisible');
-        //Ajustamos al elemento contenedor de el alimento para que se vea bien
-        $('#'+idAlimentoD).addClass('enMenu');
-        
-        ajustarCantidad(idAlimentoD);
-        automatizarCalculos(idAlimentoD);
+        if(divContent.find('#'+idAlimentoD).length === 0){
+//            console.log($('#'+id+' .enMenu .idsClass'));
+            var $elementos = $('#'+id+' .enMenu .idsClass');
+            var cuentaSi = 0;
+            for(var i = 0; i < $elementos.length; ++i){
+                if($elementos[i].value === $('#' + idAlimentoD +' input[type="hidden"]').first().val()){
+                    cuentaSi++;
+                }
+            }
+            
+            if(cuentaSi === 0){
+                divContent.append(document.getElementById(dat));
+                //hacemos visible un tache para que cuando se apachurre se elimine ese elemento
+                $('#tache'+idAlimentoD).removeClass('invisible');
+                $('#flechitas'+idAlimentoD).removeClass('invisible');
+                //Ajustamos al elemento contenedor de el alimento para que se vea bien
+                $('#'+idAlimentoD).addClass('enMenu');
+
+                if(!$('#'+idAlimentoD).hasClass('yaEsta')){
+                    ajustarCantidad(idAlimentoD);
+                    automatizarCalculos(idAlimentoD);
+                    $('#'+idAlimentoD).addClass('yaEsta');
+                }
+            }
+        }
     });
 }
 
-
-//esta es la parte en la que se muestran las pestañas
-function mostrarDomingo()
-{
+//muestra los 
+function mostrarDias(id){
     $(function(){
-        $('#domingoDieta').addClass('visible');
-        dia = 0;
-        mostrarEseDia(dia);
-        if($('#domingoDieta').hasClass('invisible'))
-        {
-            $(this).removeClass('invisible');
-        }
-        $('#lunesDieta').addClass('invisible').removeClass('visible');
-        $('#martesDieta').addClass('invisible').removeClass('visible');
-        $('#miercolesDieta').addClass('invisible').removeClass('visible');
-        $('#juevesDieta').addClass('invisible').removeClass('visible');
-        $('#viernesDieta').addClass('invisible').removeClass('visible');
-        $('#sabadoDieta').addClass('invisible').removeClass('visible');
+        $('.opcionMenu').removeClass('transparente');
+        $('#diamen'+id).addClass('transparente');
         
-        $('#domingo').addClass('transparente');
-        $('#lunes').removeClass('transparente');
-        $('#martes').removeClass('transparente');
-        $('#miercoles').removeClass('transparente');
-        $('#jueves').removeClass('transparente');
-        $('#viernes').removeClass('transparente');
-        $('#sabado').removeClass('transparente');
+        $('.diasDieta').addClass('invisible');
+        $('#diaDieta'+id).removeClass('invisible');
         
-        $('.tdDe').first().html('Domingo');
-    });
-}
-
-function mostrarLunes()
-{
-    $(function(){
-        $('#lunesDieta').addClass('visible');
-        dia = 1;
-        mostrarEseDia(dia);
-        if($('#lunesDieta').hasClass('invisible'))
-        {
-            $(this).removeClass('invisible');
-        }
-        $('#domingoDieta').addClass('invisible').removeClass('visible');
-        $('#martesDieta').addClass('invisible').removeClass('visible');
-        $('#miercolesDieta').addClass('invisible').removeClass('visible');
-        $('#juevesDieta').addClass('invisible').removeClass('visible');
-        $('#viernesDieta').addClass('invisible').removeClass('visible');
-        $('#sabadoDieta').addClass('invisible').removeClass('visible');
+        $('.tdDe').first().html(diasArreglo[id]);
         
-        $('#domingo').removeClass('transparente');
-        $('#lunes').addClass('transparente');
-        $('#martes').removeClass('transparente');
-        $('#miercoles').removeClass('transparente');
-        $('#jueves').removeClass('transparente');
-        $('#viernes').removeClass('transparente');
-        $('#sabado').removeClass('transparente');
-        
-        $('.tdDe').first().html('Lunes');
-    });
-}
-
-function mostrarMartes()
-{
-    $(function(){
-        $('#martesDieta').addClass('visible');
-        dia = 2;
-        mostrarEseDia(dia);
-        if($('#martesDieta').hasClass('invisible'))
-        {
-            $(this).removeClass('invisible');
-        }
-        $('#lunesDieta').addClass('invisible').removeClass('visible');
-        $('#domingoDieta').addClass('invisible').removeClass('visible');
-        $('#miercolesDieta').addClass('invisible').removeClass('visible');
-        $('#juevesDieta').addClass('invisible').removeClass('visible');
-        $('#viernesDieta').addClass('invisible').removeClass('visible');
-        $('#sabadoDieta').addClass('invisible').removeClass('visible');
-        
-        $('#domingo').removeClass('transparente');
-        $('#lunes').removeClass('transparente');
-        $('#martes').addClass('transparente');
-        $('#miercoles').removeClass('transparente');
-        $('#jueves').removeClass('transparente');
-        $('#viernes').removeClass('transparente');
-        $('#sabado').removeClass('transparente');
-        
-        $('.tdDe').first().html('Martes');
-    });
-}
-
-function mostrarMiercoles()
-{
-    $(function(){
-        $('#miercolesDieta').addClass('visible');
-        dia = 3;
-        mostrarEseDia(dia);
-        if($('#miercolesDieta').hasClass('invisible'))
-        {
-            $(this).removeClass('invisible');
-        }
-        $('#lunesDieta').addClass('invisible').removeClass('visible');
-        $('#martesDieta').addClass('invisible').removeClass('visible');
-        $('#domingoDieta').addClass('invisible').removeClass('visible');
-        $('#juevesDieta').addClass('invisible').removeClass('visible');
-        $('#viernesDieta').addClass('invisible').removeClass('visible');
-        $('#sabadoDieta').addClass('invisible').removeClass('visible');
-        
-        $('#domingo').removeClass('transparente');
-        $('#lunes').removeClass('transparente');
-        $('#martes').removeClass('transparente');
-        $('#miercoles').addClass('transparente');
-        $('#jueves').removeClass('transparente');
-        $('#viernes').removeClass('transparente');
-        $('#sabado').removeClass('transparente');
-        
-        $('.tdDe').first().html('Miércoles');
-    });
-}
-
-function mostrarJueves()
-{
-    $(function(){
-        $('#juevesDieta').addClass('visible');
-        dia = 4;
-        mostrarEseDia(dia);
-        if($('#juevesDieta').hasClass('invisible'))
-        {
-            $(this).removeClass('invisible');
-        }
-        $('#lunesDieta').addClass('invisible').removeClass('visible');
-        $('#martesDieta').addClass('invisible').removeClass('visible');
-        $('#miercolesDieta').addClass('invisible').removeClass('visible');
-        $('#domingoDieta').addClass('invisible').removeClass('visible');
-        $('#viernesDieta').addClass('invisible').removeClass('visible');
-        $('#sabadoDieta').addClass('invisible').removeClass('visible');
-        
-        $('#domingo').removeClass('transparente');
-        $('#lunes').removeClass('transparente');
-        $('#martes').removeClass('transparente');
-        $('#miercoles').removeClass('transparente');
-        $('#jueves').addClass('transparente');
-        $('#viernes').removeClass('transparente');
-        $('#sabado').removeClass('transparente');
-        
-        $('.tdDe').first().html('Jueves');
-    });
-}
-
-function mostrarViernes()
-{
-    $(function(){
-        $('#viernesDieta').addClass('visible');
-        dia = 5;
-        mostrarEseDia(dia);
-        if($('#viernesDieta').hasClass('invisible'))
-        {
-            $(this).removeClass('invisible');
-        }
-        $('#lunesDieta').addClass('invisible').removeClass('visible');
-        $('#martesDieta').addClass('invisible').removeClass('visible');
-        $('#miercolesDieta').addClass('invisible').removeClass('visible');
-        $('#juevesDieta').addClass('invisible').removeClass('visible');
-        $('#domingoDieta').addClass('invisible').removeClass('visible');
-        $('#sabadoDieta').addClass('invisible').removeClass('visible');
-        
-        $('#domingo').removeClass('transparente');
-        $('#lunes').removeClass('transparente');
-        $('#martes').removeClass('transparente');
-        $('#miercoles').removeClass('transparente');
-        $('#jueves').removeClass('transparente');
-        $('#viernes').addClass('transparente');
-        $('#sabado').removeClass('transparente');
-        
-        $('.tdDe').first().html('Viernes');
-    });
-}
-
-function mostrarSabado()
-{
-    $(function(){
-        $('#sabadoDieta').addClass('visible');
-        dia = 6;
-        mostrarEseDia(dia);
-        if($('#sabadoDieta').hasClass('invisible'))
-        {
-            $(this).removeClass('invisible');
-        }
-        $('#lunesDieta').addClass('invisible').removeClass('visible');
-        $('#martesDieta').addClass('invisible').removeClass('visible');
-        $('#miercolesDieta').addClass('invisible').removeClass('visible');
-        $('#juevesDieta').addClass('invisible').removeClass('visible');
-        $('#viernesDieta').addClass('invisible').removeClass('visible');
-        $('#domingoDieta').addClass('invisible').removeClass('visible');
-        
-        $('#domingo').removeClass('transparente');
-        $('#lunes').removeClass('transparente');
-        $('#martes').removeClass('transparente');
-        $('#miercoles').removeClass('transparente');
-        $('#jueves').removeClass('transparente');
-        $('#viernes').removeClass('transparente');
-        $('#sabado').addClass('transparente');
-        
-        $('.tdDe').first().html('Sábado');
+        mostrarEseDia(id);
     });
 }
 
@@ -333,23 +176,27 @@ function remover(id)
 {
     $(function(){
         ajustarCantidad(id);
-        caloriasDia[dia] -= calTem;
-        caloriasDia[dia] = caloriasDia[dia].toFixed(1);
+        caloriasDia[diaDietas] -= calTem;
+        caloriasDia[diaDietas] = parseFloat(caloriasDia[diaDietas].toFixed(1));
+        
+        if(caloriasDia[diaDietas] < 0){
+            caloriasDia[diaDietas] = 0;
+        }
 
         caloriasPromedio = 0;
         for(var i = 0; i < caloriasDia.length; ++i){
             caloriasPromedio += caloriasDia[i];
         }
         caloriasPromedio = caloriasPromedio / 7;
-        caloriasPromedio = caloriasPromedio.toFixed(1);
+        caloriasPromedio = parseFloat(caloriasPromedio.toFixed(1));
         
-        proteinas[dia] -= proTem;
-        lipidos[dia] -= lipTem;
-        carbohidratos[dia] -= carTem;
+        proteinas[diaDietas] -= proTem;
+        lipidos[diaDietas] -= lipTem;
+        carbohidratos[diaDietas] -= carTem;
         
-        proteinas[dia] = proteinas[dia].toFixed(1);
-        lipidos[dia] = lipidos[dia].toFixed(1);
-        carbohidratos[dia] = carbohidratos[dia].toFixed(1);
+        proteinas[diaDietas] = parseFloat(proteinas[diaDietas].toFixed(1));
+        lipidos[diaDietas] = parseFloat(lipidos[diaDietas].toFixed(1));
+        carbohidratos[diaDietas] = parseFloat(carbohidratos[diaDietas].toFixed(1));
         
         porcentajes();
         $("#"+id).remove();
@@ -362,12 +209,16 @@ function buscarAlimento(){
         $('#buscar').autocomplete({
             source: function(request, response){
                 var alimento = request.term;
+                filtro = $('#filtro').val();
                 if(alimento.length  > 0){
                     $.ajax({
                         url: 'http://localhost:8080/StrongFit/sBusquedaN',
                         type: 'get',
                         dataType: 'json',
-                        data: {'nombre-alimento': alimento},
+                        data: {
+                            'nombre-alimento': alimento,
+                            filtro: filtro
+                        },
                         success: function(datos){
                             $('#idcontenedor-resultados').html('<div class = "resultado invisible" id = "resultadoClon" draggable = "true" ondragstart="drag(event, id)"></div>');
                             var nombre = [];
@@ -391,7 +242,7 @@ function buscarAlimento(){
                                 $clon.removeClass('invisible');
                                 $clon.attr('id', idClon);
 //                                console.log(idClon);
-                                $clon.html('<input type = "hidden" id = "alimento'+idClon+'" name = "ids" value="'+ids[i]+'"><input type = "hidden" id = "calorias'+idClon+'" name = "calorias" value="'+calorias[i]+'"><input type = "hidden" id = "lipidos'+idClon+'" name = "lipidos" value="'+datos[i].lipidos+'"><input type = "hidden" id = "proteinas'+idClon+'" name = "proteinas" value="'+datos[i].proteinas+'"><input type = "hidden" id = "carbohidratos'+idClon+'" name = "carbohidratos" value="'+datos[i].carbohidratos+'"><input type="hidden" id="consideracion'+idClon+'" name="consideracion" value="'+datos[i].consideracion+'"><input type="hidden" id="porcion'+idClon+'" name="porcion" value="'+datos[i].porcion+'"><input type="hidden" id="cantidad'+idClon+'" name="cantidad" value="30" ><span id="textoResultado">'+nombre[i]+'</span><span id = "tache'+idClon+'" onclick="remover('+idClon+');" class = "icon-cancel-circle invisible"></span><div class="invisible" id="flechitas'+idClon+'"><span class="icon3-circle-up flechitasF" id="masF'+idClon+'"></span><span class="icon3-circle-down flechitasF" id="menosF'+idClon+'"></span><input class="setCantidad" type="text" id="cantidadAsignada'+idClon+'" value="'+cantidadDef+'">g</div>');
+                                $clon.html('<input type = "hidden" id = "alimento'+idClon+'" class="idsClass" name = "ids" value="'+ids[i]+'"><input type = "hidden" id = "calorias'+idClon+'" name = "calorias" value="'+calorias[i]+'"><input type = "hidden" id = "lipidos'+idClon+'" name = "lipidos" value="'+datos[i].lipidos+'"><input type = "hidden" id = "proteinas'+idClon+'" name = "proteinas" value="'+datos[i].proteinas+'"><input type = "hidden" id = "carbohidratos'+idClon+'" name = "carbohidratos" value="'+datos[i].carbohidratos+'"><input type="hidden" id="consideracion'+idClon+'" name="consideracion" value="'+datos[i].consideracion+'"><input type="hidden" id="porcion'+idClon+'" name="porcion" value="'+datos[i].porcion+'"><input type="hidden" id="cantidad'+idClon+'" name="cantidad" value="30" ><span id="textoResultado">'+nombre[i]+'</span><span id = "tache'+idClon+'" onclick="remover('+idClon+');" class = "icon-cancel-circle invisible"></span><div class="invisible" id="flechitas'+idClon+'"><span class="icon3-circle-up flechitasF" onclick="incrementaBaja('+idClon+',1);" id="masF'+idClon+'"></span><span class="icon3-circle-down flechitasF" onclick="incrementaBaja('+idClon+',2);" id="menosF'+idClon+'"></span><input class="setCantidad" type="text" onchange="cambiarIndependiente('+idClon+');" id="cantidadAsignada'+idClon+'" value="'+cantidadDef+'">g</div>');
                                 $('#resultadoClon').addClass('invisible');
                                 $clon.appendTo("#idcontenedor-resultados");
 //                                var tache =  document.getElementById("tache"+idClon);
@@ -413,7 +264,7 @@ function buscarAlimento(){
 
 function contarElementos(){
     $(function(){
-        var confirmar = confirm("Esta seguro(a) que desea finalizar esta dieta, podra editarla después si es necesario.");
+        var confirmar = confirm("¿Esta seguro(a) qué desea finalizar esta dieta?, podrá editarla después si es necesario.");
         if(confirmar){
             var tam = 0;
             var valores = "";
@@ -439,35 +290,18 @@ function setCaloriasMeta(){
 
 function automatizarCalculos(id){
     $(function(){
-        alert(caloriasDia[dia]);
-        alert(calTem);
-        caloriasDia[dia] += calTem;
-        caloriasDia[dia] = parseFloat(caloriasDia[dia].toFixed(1));
-        caloriasPromedio = 0;
-        for(var i = 0; i < caloriasDia.length; ++i){
-            caloriasPromedio += caloriasDia[i];
-        }
-        caloriasPromedio = caloriasPromedio / 7;
-        caloriasPromedio = caloriasPromedio.toFixed(1);
-        tem = caloriasPromedio - Math.floor(caloriasPromedio);
-        if(tem >= .5){
-            tem = 1;
-        }
-        else{
-            tem = 0;
-        }
+        caloriasDia[diaDietas] += calTem;
+        caloriasDia[diaDietas] = parseFloat(caloriasDia[diaDietas].toFixed(1));
         
-        caloriasPromedio = Math.floor(caloriasPromedio) + tem;
-        tem = 0;
         
-        proteinas[dia] += proTem;
-        lipidos[dia] += lipTem;
-        carbohidratos[dia] += carTem;
+        proteinas[diaDietas] += proTem;
+        lipidos[diaDietas] += lipTem;
+        carbohidratos[diaDietas] += carTem;
         
-        proteinas[dia] = proteinas[dia].toFixed(1);
-        lipidos[dia] = lipidos[dia].toFixed(1);
-        carbohidratos[dia] = carbohidratos[dia].toFixed(1);
-        
+        proteinas[diaDietas] = parseFloat(proteinas[diaDietas].toFixed(1));
+        lipidos[diaDietas] = parseFloat(lipidos[diaDietas].toFixed(1));
+        carbohidratos[diaDietas] = parseFloat(carbohidratos[diaDietas].toFixed(1));
+
         porcentajes();
     });
 }
@@ -490,6 +324,15 @@ function ajustarCantidad(id){
     calTem = cant * parseFloat($('#calorias'+id).val()) / 100;
 }
 
+function ajustarCantidad2(id, can45){
+    var cant = can45;
+    proTem = cant * parseFloat($('#proteinas'+id).val()) / 100;
+    lipTem = cant * parseFloat($('#lipidos'+id).val()) / 100;
+    carTem = cant * parseFloat($('#carbohidratos'+id).val()) / 100;
+    calTem = cant * parseFloat($('#calorias'+id).val()) / 100;
+    $('#cantidad'+id).val(cant);
+}
+
 function porcentajes(){
     /*
      * La relacion es asi:
@@ -498,72 +341,261 @@ function porcentajes(){
      * 1g de carbohidrato --------- 4 kcal
      */
     
-    if(caloriasDia[dia] > 0){
-        proPorciento[dia] = ((4 * proteinas[dia]) / caloriasDia[dia]) * 100;console.log(proPorciento[dia]);
-        lipPorciento[dia] = ((9 * lipidos[dia]) / caloriasDia[dia]) * 100;console.log(lipPorciento[dia]);
-        carPorciento[dia] = ((4 * carbohidratos[dia]) / caloriasDia[dia]) * 100;console.log(carPorciento[dia]);
+    if(caloriasDia[diaDietas] > 0){
+        proPorciento[diaDietas] = ((4 * proteinas[diaDietas]) / caloriasDia[diaDietas]) * 100;
+        lipPorciento[diaDietas] = ((9 * lipidos[diaDietas]) / caloriasDia[diaDietas]) * 100;
+        carPorciento[diaDietas] = ((4 * carbohidratos[diaDietas]) / caloriasDia[diaDietas]) * 100;
 
-        tem = proPorciento[dia] - Math.floor(proPorciento[dia]);
-        if(tem >= .5){
-            tem = 1;
-        }
-        else{
-            tem = 0;
-        }
-        proPorciento[dia] = Math.floor(proPorciento[dia]) + parseInt(tem);
-
-        tem = carPorciento[dia] - Math.floor(carPorciento[dia]);
-        if(tem >= .5){
-            tem = 1;
-        }
-        else{
-            tem = 0;
-        }
-        carPorciento[dia] = Math.floor(carPorciento[dia]) + parseInt(tem);
-
-        tem = lipPorciento[dia] - Math.floor(lipPorciento[dia]);console.log(tem);
-        if(tem >= .5){
-            tem = 1;
-        }
-        else{
-            tem = 0;
-        }
-        lipPorciento[dia] = Math.floor(lipPorciento[dia]) + parseInt(tem);
+        proPorciento[diaDietas] = parseInt(proPorciento[diaDietas].toFixed());
+        carPorciento[diaDietas] = parseInt(carPorciento[diaDietas].toFixed());
+        lipPorciento[diaDietas] = parseInt(lipPorciento[diaDietas].toFixed());
     }
     else{
-        proPorciento[dia] = 0;
-        lipPorciento[dia] = 0;
-        carPorciento[dia] = 0;
+        proPorciento[diaDietas] = 0;
+        lipPorciento[diaDietas] = 0;
+        carPorciento[diaDietas] = 0;
     }
-    $('#caloriasDia').html(caloriasDia[dia]);
-    $('#caloriasPromedio').html(caloriasPromedio);
-    $('#proteinasPromedio').html(proPorciento[dia]);
-    $('#lipidosPromedio').html(lipPorciento[dia]);
-    $('#carbohidratosPromedio').html(carPorciento[dia]);
-}
-
-function incrementaBaja(){
     
+    caloriasPromedio = 0;
+    for(var i = 0; i < caloriasDia.length; ++i){
+        caloriasPromedio += caloriasDia[i];
+    }
+    caloriasPromedio = caloriasPromedio / 7;
+    caloriasPromedio = parseFloat(caloriasPromedio.toFixed());
+    
+    $('#caloriasDia').html(caloriasDia[diaDietas]);
+    $('#caloriasPromedio').html(caloriasPromedio);
+    $('#proteinasPromedio').html(proPorciento[diaDietas]);
+    $('#lipidosPromedio').html(lipPorciento[diaDietas]);
+    $('#carbohidratosPromedio').html(carPorciento[diaDietas]);
 }
 
-function quitarExceso(num){
-    var n = num + "";
-    var t = "";
-    var contar6 = 0;
-    for(var i = 0; i < n.length; i++){
-        if(contar6 < 2){
-            t += n.charAt(i)
-            if(t === "." || contar6 > 0){
-                alert(t);
-                contar6++;
-            }
+function incrementaBaja(id, tipo3){
+//    $(function(){
+        var $can = parseInt($('#cantidad'+id).val());
+        var $canAsignada = parseInt($('#cantidadAsignada'+id).val());
+        
+        if(tipo3 === 1){ 
+            $canAsignada += 10;
         }
         else{
-            return parseFloat(t);
+            $canAsignada -= 10;
         }
-    }
-    return parseFloat(t);
+        
+        if($canAsignada > 0){
+            ajustarCantidad2(id, $can);
+            caloriasDia[diaDietas] -= calTem;
+            proteinas[diaDietas] -= proTem;
+            lipidos[diaDietas] -= lipTem;
+            carbohidratos[diaDietas] -= carTem;
+
+            caloriasDia[diaDietas] = parseFloat(caloriasDia[diaDietas].toFixed(1));
+            proteinas[diaDietas] = parseFloat(proteinas[diaDietas].toFixed(1));
+            lipidos[diaDietas] = parseFloat(lipidos[diaDietas].toFixed(1));
+            carbohidratos[diaDietas] = parseFloat(carbohidratos[diaDietas].toFixed(1));
+
+            $('#cantidadAsignada'+id).val($canAsignada);
+            ajustarCantidad2(id, $canAsignada);
+
+            caloriasDia[diaDietas] += calTem;
+            proteinas[diaDietas] += proTem;
+            lipidos[diaDietas] += lipTem;
+            carbohidratos[diaDietas] += carTem;
+
+            porcentajes();
+            if($canAsignada <= 10){
+                $('#menosF'+id).addClass('desactivado');
+            }
+            else{
+                $('#menosF'+id).removeClass('desactivado');
+            }
+        }
+//    });
+}
+
+function cambiarIndependiente(id){
+    $(function(){
+        var $can = parseInt($('#cantidad'+id).val());
+        var $canAsignada = parseInt($('#cantidadAsignada'+id).val());
+        
+        try{
+            if(isNaN($canAsignada)) throw "not a number"
+        }
+        catch(err){
+            $('#cantidadAsignada'+id).val($can);
+            return false;
+        }
+        
+        ajustarCantidad2(id, $can);
+        caloriasDia[diaDietas] -= calTem;
+        proteinas[diaDietas] -= proTem;
+        lipidos[diaDietas] -= lipTem;
+        carbohidratos[diaDietas] -= carTem;
+        
+        caloriasDia[diaDietas] = parseFloat(caloriasDia[diaDietas].toFixed(1));
+        proteinas[diaDietas] = parseFloat(proteinas[diaDietas].toFixed(1));
+        lipidos[diaDietas] = parseFloat(lipidos[diaDietas].toFixed(1));
+        carbohidratos[diaDietas] = parseFloat(carbohidratos[diaDietas].toFixed(1));
+        
+        if($canAsignada < 0){
+            $canAsignada = $canAsignada * -1;
+        }
+        
+        $('#cantidadAsignada'+id).val($canAsignada);
+        ajustarCantidad2(id, $canAsignada);
+
+        caloriasDia[diaDietas] += calTem;
+        proteinas[diaDietas] += proTem;
+        lipidos[diaDietas] += lipTem;
+        carbohidratos[diaDietas] += carTem;
+        
+        porcentajes();
+        if($canAsignada <= 10){
+                $('#menosF'+id).addClass('desactivado');
+            }
+            else{
+                $('#menosF'+id).removeClass('desactivado');
+            }
+    });
 }
 
 
+function borrarDieta(contadorD){
+    $(function(){
+        var confirmacion = confirm("Esta seguro(a) que desesa borrar esta dieta, los pacientes que la esten siguiendo también se verán afectados.");
+        if(confirmacion){
+            var idDiet = $('#idsDieta'+contadorD).val();
+            $.ajax({
+                url: 'http://localhost:8080/StrongFit/sBorrarDieta',
+                type: 'post',
+                dataType: 'json',
+                data: {
+                    idDieta: idDiet
+                },
+                success: function(res){
+                    $('#dieta'+contadorD).remove();
+                }
+            });
+        }
+    });
+}
 
+
+function editarDieta(contadorD){
+    $(function(){
+        var idDiet = $('#idsDieta'+contadorD).val();
+        var nombre = $('#nombreDieta'+contadorD).html();
+
+        $.ajax({
+            url: 'http://localhost:8080/StrongFit/sEditarDieta',
+            type: 'post',
+            dataType: 'json',
+            data: {
+                idDieta: idDiet,
+                nombreDieta: nombre
+            },
+            success: function(res){
+                location.reload();
+            }
+        });
+    });
+}
+
+
+function setContadorD(stCon){
+    contadorD = stCon;
+}
+
+function setCaloriasEdicion(cal1, cal2, cal3, cal4, cal5, cal6, cal7){
+    caloriasDia[0] = cal1;
+    caloriasDia[1] = cal2;
+    caloriasDia[2] = cal3;
+    caloriasDia[3] = cal4;
+    caloriasDia[4] = cal5;
+    caloriasDia[5] = cal6;
+    caloriasDia[6] = cal7;
+}
+
+function setProteinasEdicion(cal1, cal2, cal3, cal4, cal5, cal6, cal7){
+    proteinas[0] = cal1;
+    proteinas[1] = cal2;
+    proteinas[2] = cal3;
+    proteinas[3] = cal4;
+    proteinas[4] = cal5;
+    proteinas[5] = cal6;
+    proteinas[6] = cal7;
+}
+
+function setLipidosEdicion(cal1, cal2, cal3, cal4, cal5, cal6, cal7){
+    lipidos[0] = cal1;
+    lipidos[1] = cal2;
+    lipidos[2] = cal3;
+    lipidos[3] = cal4;
+    lipidos[4] = cal5;
+    lipidos[5] = cal6;
+    lipidos[6] = cal7;
+}
+
+function setCarbohidratosEdicion(cal1, cal2, cal3, cal4, cal5, cal6, cal7){
+    $(function(){
+        carbohidratos[0] = cal1;
+        carbohidratos[1] = cal2;
+        carbohidratos[2] = cal3;
+        carbohidratos[3] = cal4;
+        carbohidratos[4] = cal5;
+        carbohidratos[5] = cal6;
+        carbohidratos[6] = cal7;
+
+        porcentajes();
+    });
+}
+
+function mostrarDiaMuestra(id){
+    $(function(){
+        $('.MenuMuestra').removeClass('transparente');
+        $('#muestraDia'+id).addClass('transparente');
+        
+        $('.Muestras').addClass('invisible');
+        $('#diaMuestra'+id).removeClass('invisible');
+        
+        $('#caloriasMuestra').html('Calorías: ' + caloriasMuestra[id]);
+        $('#proteinasMuestra').html('Proteinas: ' + proteinasMuestra[id]);
+        $('#lipidosMuestra').html('Lípidos: ' + lipidosMuestra[id]);
+        $('#carbohidratosMuestra').html('Carbohidratos: ' + carbohidratosMuestra[id]);
+    });
+}
+
+function mostrarDieta(idDieta, con){
+    $(function(){
+        $.ajax({
+            url: 'http://localhost:8080/StrongFit/sMostrarDieta',
+            type: 'post',
+            dataType: 'json',
+            data:{
+                idDietaMostrar: idDieta
+            },
+            success: function(res){                
+                var contadorDieta = 0;
+                
+                for(var i = 0; i < 7; ++i){
+                    caloriasMuestra[i] = res.caloriasM[i];
+                    proteinasMuestra[i] = res.proteinasM[i];
+                    lipidosMuestra[i] = res.lipidosM[i];
+                    carbohidratosMuestra[i] = res.carbohidratosM[i];
+                }
+                
+                for(var i = 0; i < 35; ++i){
+                    $('#espacioMuestraContenedor'+i).html("");
+                    for(var j = 0; j < res.cuantosM[i]; ++j){
+                        $('#espacioMuestraContenedor'+i).append("<div class = 'resultado enMenu yaEsta' style='cursor:default;'>"+res.nombresM[contadorDieta]+" "+res.cantidadesM[contadorDieta]+"g</div>");
+                        contadorDieta++;
+                    }
+                }
+                
+                $('#nombreMuestraDieta').html($('#nombreDieta'+con).html());
+                
+                mostrarDiaMuestra(0);
+            }
+        });
+    });
+}

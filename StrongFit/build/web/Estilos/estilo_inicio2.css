@@ -12,6 +12,7 @@ body {
   margin: 0 auto;
   margin-bottom: 1em;
   max-width: 50em;
+  position:relative;
 }
 .Article-title {
   background: #0070c8;
@@ -65,7 +66,112 @@ body {
   position:fixed;
   z-index:3;
   left:24%;
-  top:85%;
+  top:74%;
   width:30%;
   height:10%;
+}
+.Article-articulosf {
+  background-color:darkgray;
+  height: 40%;
+  width: 70%;
+  position: absolute;
+  border-radius: 15px;
+  top: 53%;
+}
+.Article-articulosg {
+  position: fixed;
+  top: 20%;
+  right: 5%;
+  width: 22%;
+  border-width: thin; 
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  height: 30%;
+  overflow-y:  auto;
+  overflow-x: hidden;
+  
+}
+.Article-articulosh {
+ background-color: whitesmoke;
+ border-right-style: outset;
+  border-top-style: outset;
+  border-left-style: outset;
+  position: absolute;
+  width: 96%;
+}
+.Article-articulosh2 {
+ background-color: whitesmoke;
+ border-right-style: outset;
+  border-top-style: outset;
+  border-left-style: outset;
+    border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+  position: absolute;
+  width: 96%;
+}
+.Article-articulosh3 {
+    border-right-style: outset;
+ background-color: whitesmoke;
+ border-left-style: outset;
+  border-top-style: outset;
+  position: absolute;
+  width: 96%;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  border-bottom-style: outset;
+}
+.Article-articulosi {
+   position: absolute;
+ 
+  top: 44%;
+}
+.Article-articulosj {
+   position: fixed;
+   background-color: cornflowerblue;
+  bottom: 10%;
+  right: 5%;
+  width: 22%;
+  border-width: thin; 
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+   border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  height: 30%;
+  overflow-y:  auto;
+  overflow-x: hidden;
+}
+
+.botonenviar {
+    background-color: #0070c8;
+  color: white;
+  position: fixed;
+  top: 88%;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+   border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+}
+.portada {
+  width: 70% ;
+ height: 20%;
+  position: absolute;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+   border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+}
+
+.portada2 {
+  width: 96% ;
+ height: 9em;
+  position: absolute;
+}
+.articulosk {
+ background-color: #0070c8;
+  color: white;
+  width: 73%;
+   border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+   border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
 }
